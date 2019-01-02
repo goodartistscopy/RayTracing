@@ -2,12 +2,10 @@
 
 #include "hitable.h"
 
-#include <atomic>
 #include <iostream>
 
 class Material;
 
-std::atomic_uint64_t n_hit_tests;
 
 class Sphere : public Hitable
 {
@@ -20,9 +18,6 @@ public:
     virtual bool hit(const Ray &ray, float tmin, float tmax, Hit &hit) const override;
     
     virtual bool bounding_box(AABB &box) const override;
-
-    static void reset_stats() { n_hit_tests = 0; }
-    static int get_stats() { return n_hit_tests; }
 
     inline void get_uv(const Vec3 &p, float &u, float &v) const
     {
@@ -49,8 +44,6 @@ private:
 
 bool Sphere::hit(const Ray &ray, float tmin, float tmax, Hit &hit) const
 {
-    n_hit_tests++;
-
     Vec3 oc = ray.origin() - center;
     float a = dot(ray.direction(), ray.direction());
     float b = dot(oc, ray.direction());

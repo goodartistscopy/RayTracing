@@ -254,8 +254,6 @@ int main(int argc, char *argv[])
         
         std::cout << "Rendering frame " << t << std::endl;
 
-        Hitable::reset_stats();
-    
         #pragma omp parallel for
         for (int j = 0; j < height; ++j) {
             for (int i = 0; i < width; ++i) {
@@ -274,8 +272,6 @@ int main(int argc, char *argv[])
                 pixels[3*(width*j + i)+2] = color.b8();
             }
         }
-
-        std::cout << Hitable::get_stats() << " hit tests\n";    
 
         std::stringstream ss;
         ss << filename << std::setw(3) << std::setfill('0') << t << ".png";
