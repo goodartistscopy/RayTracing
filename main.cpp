@@ -51,6 +51,9 @@ void build_book_scene_bvh(HitableList &world, Camera &cam)
 
     world.add(new Sphere(Vec3(0, -1000, 0), 1000, new Lambertian(new CheckerTexture(Vec3(0.5, 0.5, 0.6), Vec3(1.0, 1.0, 1.0)))));
 
+    world.add(new Sphere(Vec3(0.0, 0.0, 0.0), 10000,
+              new DiffuseLight(new ConstantTexture(Vec3(0.9, 0.9, 1.0)))));
+
     std::vector<Hitable *>elems;
         
     int n_spheres = 150;
@@ -213,11 +216,8 @@ int main(int argc, char *argv[])
     HitableList world;
     Camera cam;
 
-    // intialize the random seed
-    random_in_0_1();
-
-    //build_book_scene_bvh(world, cam);
-    build_book_scene(world, cam);
+    build_book_scene_bvh(world, cam);
+    //build_book_scene(world, cam);
     
     //build_big_bvh(world, cam);
     
@@ -226,17 +226,17 @@ int main(int argc, char *argv[])
 
     //build_test_light(world, cam);
 
-    int width = 160;
-    int height = 120;
+    int width = 960;
+    int height = 720;
     
     uint8_t * pixels = new uint8_t[3*width*height];
     
-    int ns = 100;
+    int ns = 10;
     
     int start = 20;
     int stop = 21;
     int tmax = 100;
-    const char * filename = "out/test_";
+    const char * filename = "../out/book_";
     for (int t = start; t < stop; t++) {
         float tm = tmax > 1 ? float(t) / (tmax-1) : 0.5;
         tm = (sin(-M_PI/2 + tm*M_PI) + 1.0) / 2.0;
@@ -254,7 +254,7 @@ int main(int argc, char *argv[])
         
         std::cout << "Rendering frame " << t << std::endl;
 
-        Sphere::reset_stats();
+        Hitable::reset_stats();
     
         #pragma omp parallel for
         for (int j = 0; j < height; ++j) {
@@ -275,11 +275,12 @@ int main(int argc, char *argv[])
             }
         }
 
-        std::cout << Sphere::get_stats() << " hit tests\n";    
+        std::cout << Hitable::get_stats() << " hit tests\n";    
 
         std::stringstream ss;
         ss << filename << std::setw(3) << std::setfill('0') << t << ".png";
         std::string fname = ss.str(); 
+        std::cout << "Saving " << fname << std::endl;
         stbi_write_png(fname.c_str(), width, height, 3, pixels, 3 * width);
 
         ss.str(std::string());
