@@ -3,7 +3,7 @@
 #include <math.h>
 #include <iostream>
 
-float clamp(float value, float min, float max)
+inline float clamp(float value, float min, float max)
 {
     return (value > min) ? ((value < max) ? value : max) : min;
 }
@@ -29,11 +29,11 @@ public:
     
     inline float b() const { return e[2]; }
  
-    inline uint8_t r8() { return uint8_t(sqrt(clamp(e[0], 0.0, 1.0))*255.99); }
+    inline uint8_t r8() { return uint8_t(sqrt(clamp(e[0], 0.0f, 1.0f))*255.99); }
     
-    inline uint8_t g8() { return uint8_t(sqrt(clamp(e[1], 0.0, 1.0))*255.99); }
+    inline uint8_t g8() { return uint8_t(sqrt(clamp(e[1], 0.0f, 1.0f))*255.99); }
     
-    inline uint8_t b8() { return uint8_t(sqrt(clamp(e[2], 0.0, 1.0))*255.99); }
+    inline uint8_t b8() { return uint8_t(sqrt(clamp(e[2], 0.0f, 1.0f))*255.99); }
 
     inline const Vec3& operator+() { return *this; }
     
