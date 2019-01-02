@@ -3,8 +3,11 @@
 #include <math.h>
 #include <limits>
 
-thread_local uint32_t s_RndState = 1;
-uint32_t XorShift32()
+#include "vec3.h"
+
+static thread_local uint32_t s_RndState = 1;
+
+inline uint32_t XorShift32()
 {
     uint32_t x = s_RndState;
     x ^= x << 13;
@@ -24,7 +27,7 @@ inline float random_in_0_1()
     return my_random();
 }
 
-Vec3 random_in_unit_sphere()
+inline Vec3 random_in_unit_sphere()
 {
     Vec3 v;
     do {
@@ -34,7 +37,7 @@ Vec3 random_in_unit_sphere()
     return v;
 }
 
-Vec3 random_in_unit_disk()
+inline Vec3 random_in_unit_disk()
 {
     Vec3 v;
     do {
@@ -55,7 +58,7 @@ inline float fast_max(float a, float b)
 }
 
 template<typename T>
-T clamp(T value, T min, T max)
+inline T clamp(T value, T min, T max)
 {
     return (value > min) ? ((value < max) ? value : max) : min;
 }
