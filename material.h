@@ -7,6 +7,8 @@
 class Material
 {
 public:
+    virtual ~Material() = default;
+    
     virtual bool scatter(const Ray &incoming, const Hit &hit, Vec3 &attenuation, Ray &scattered) const = 0;
 
     virtual Vec3 emitted(float u, float v, const Vec3 &p) const
