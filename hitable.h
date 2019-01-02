@@ -59,7 +59,6 @@ public:
 
     virtual bool bounding_box(AABB &box) const override
     {
-        std::cout << "here\n";
         if (elems.empty()) return false;
         
         AABB temp_box; 
