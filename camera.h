@@ -19,6 +19,8 @@ public:
   
     Ray get_ray(float u, float v) const;
   
+    Vec3 project(Vec3 x) const;
+
 private:
     void update_internals();
  

@@ -47,6 +47,14 @@ Ray Camera::get_ray(float u, float v) const
     return Ray(origin + offset, lower_left_corner + u * horizontal + v * vertical - (origin + offset));
 }
 
+Vec3 Camera::project(Vec3 x) const
+{
+    Vec3 ox = x - origin;
+    Vec3 xc(dot(cx, ox), dot(cy, ox), dot(cz, ox));
+    Vec3 xp = xc / -xc.z();
+    return Vec3(xp.x(), xp.y(), xp.z()) + 0.5;
+}
+
 void Camera::update_internals()
 {
     lower_left_corner = origin - focus_dist * (half_width * cx + half_height * cy + cz);

@@ -26,6 +26,54 @@ Vec3 background(const Ray &r)
     return mix(Vec3(0.5, 0.7, 1.0), Vec3(1.0, 1.0, 1.0), t);
 }
 
+void draw_line(uint8_t *img_data, int width, int height, float x0, float y0, float x1, float y1, Vec3 color)
+{
+    if (x1 < x0) {
+        std::swap(x1, x0);
+        std::swap(y1, y0);
+    }
+
+    float dx = x1 - x0;
+    float dy = y1 - y0;
+    
+    float rx, ry;
+    if (dx > fabs(dy)) {
+        ry = dy / dx;
+        rx = 1.0;
+    } else {
+        ry = signbit(dy) ? -1.0 : 1.0;
+        rx = dx / fabs(dy);
+    }
+
+    float y = y0;
+    float x = x0;
+    while ((x <= x1) && (y*dy <= y1*dy)) {
+        int xp = int(std::floor(x+0.5));
+        int yp = int(std::floor(y+0.5));
+        if ((xp >= 0) && (xp < width) && (yp >= 0) && (yp < height)) {
+            img_data[3*(yp*width+xp)] = color.r8();
+            img_data[3*(yp*width+xp)+1] = color.g8();
+            img_data[3*(yp*width+xp)+2] = color.b8();
+        }
+
+        x += rx;
+        y += ry;
+    }
+}
+
+void draw_world_axis(uint8_t *img_data, int width, int height, const Camera &cam)
+{
+    Vec3 d(width, height, 0.0);
+    Vec3 O = d * cam.project(Vec3(0.0));
+    Vec3 X = d * cam.project(Vec3(10.0, 0.0, 0.0));
+    Vec3 Y = d * cam.project(Vec3(0.0, 10.0, 0.0));
+    Vec3 Z = d * cam.project(Vec3(0.0, 0.0, 10.0));
+
+    draw_line(img_data, width, height, O.x(), height-O.y(), X.x(), height-X.y(), Vec3(1.0, 0.0, 0.0));
+    draw_line(img_data, width, height, O.x(), height-O.y(), Y.x(), height-Y.y(), Vec3(0.0, 1.0, 0.0));
+    draw_line(img_data, width, height, O.x(), height-O.y(), Z.x(), height-Z.y(), Vec3(0.0, 0.0, 1.0));
+}
+
 inline Vec3 trace_ray(const Ray &r, const Hitable &world, int depth = 0)
 {
     Hit hit;
@@ -85,7 +133,7 @@ void build_book_scene_bvh(HitableList &world, Camera &cam)
 void build_book_scene(HitableList &world, Camera &cam)
 {
     cam.setup(20.0, 1.33333);
-    cam.look_at(Vec3(-5, 2, 30), Vec3(0, 0, 0), Vec3(0, 1, 0));
+    cam.look_at(Vec3(-5, 2, 30), Vec3(0, 0, 0), Vec3(0.0, 1.0, 0));
     cam.set_lens(0.2, 30.0);
 
     world.add(new Sphere(Vec3(0, -1000, 0), 1000, new Lambertian(new CheckerTexture(Vec3(0.5, 0.5, 0.6), Vec3(1.0, 1.0, 1.0)))));
@@ -193,7 +241,7 @@ void build_test_light(HitableList &world, Camera &cam)
     //                new DiffuseLight(new ConstantTexture(Vec3(0.1, 0.1, 0.15)))));
 
     int width, height, nc;
-    uint8_t *tex_data = stbi_load("data/earthmap.jpg", &width, &height, &nc, 0);
+    uint8_t *tex_data = stbi_load("../data/earthmap.jpg", &width, &height, &nc, 0);
     
     if (tex_data) {
         elems.push_back(new Sphere(Vec3(0, 3.5, 0), 3.0,
@@ -216,7 +264,7 @@ int main(int argc, char *argv[])
     HitableList world;
     Camera cam;
 
-    build_book_scene_bvh(world, cam);
+    //build_book_scene_bvh(world, cam);
     //build_book_scene(world, cam);
     
     //build_big_bvh(world, cam);
@@ -224,17 +272,17 @@ int main(int argc, char *argv[])
     //build_test_perlin(world, cam);
     //build_test_texture(world, cam);
 
-    //build_test_light(world, cam);
+    build_test_light(world, cam);
 
     int width = 960;
     int height = 720;
     
     uint8_t * pixels = new uint8_t[3*width*height];
     
-    int ns = 10;
+    int ns = 5;
     
-    int start = 20;
-    int stop = 21;
+    int start = 0;
+    int stop = 100;
     int tmax = 100;
     const char * filename = "../out/book_";
     for (int t = start; t < stop; t++) {
@@ -250,7 +298,7 @@ int main(int argc, char *argv[])
         float y = 8 + 10 * 4*(tm-0.5)*(tm-0.5);
         float z = 50.0 * cos(2*tm*M_PI);
         //cam.look_at(Vec3(x, y, z), Vec3(0, 3, 0), Vec3(0, 1, 0));
-        cam.look_at(Vec3(x, y, z), Vec3(0, 1, 0), Vec3(0, 1, 0));
+        cam.look_at(Vec3(x, y, z), Vec3(0, 1, 0), Vec3(0.2, 0.8, 0));
         
         std::cout << "Rendering frame " << t << std::endl;
 
@@ -272,6 +320,8 @@ int main(int argc, char *argv[])
                 pixels[3*(width*j + i)+2] = color.b8();
             }
         }
+
+        draw_world_axis(pixels, width, height, cam);
 
         std::stringstream ss;
         ss << filename << std::setw(3) << std::setfill('0') << t << ".png";
