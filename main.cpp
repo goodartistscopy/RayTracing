@@ -61,7 +61,7 @@ void draw_line(uint8_t *img_data, int width, int height, float x0, float y0, flo
     }
 }
 
-void draw_world_axis(uint8_t *img_data, int width, int height, const Camera &cam)
+void draw_world_axis(uint8_t *img_data, int width, int height, const Camera &cam, float length = 1.0)
 {
     Vec3 d(width, height, 0.0);
     Vec3 O = d * cam.project(Vec3(0.0));
@@ -69,9 +69,9 @@ void draw_world_axis(uint8_t *img_data, int width, int height, const Camera &cam
     Vec3 Y = d * cam.project(Vec3(0.0, 10.0, 0.0));
     Vec3 Z = d * cam.project(Vec3(0.0, 0.0, 10.0));
 
-    draw_line(img_data, width, height, O.x(), height-O.y(), X.x(), height-X.y(), Vec3(1.0, 0.0, 0.0));
-    draw_line(img_data, width, height, O.x(), height-O.y(), Y.x(), height-Y.y(), Vec3(0.0, 1.0, 0.0));
-    draw_line(img_data, width, height, O.x(), height-O.y(), Z.x(), height-Z.y(), Vec3(0.0, 0.0, 1.0));
+    draw_line(img_data, width, height, O.x(), height-O.y(), X.x(), height-X.y(), Vec3(length, 0.0, 0.0));
+    draw_line(img_data, width, height, O.x(), height-O.y(), Y.x(), height-Y.y(), Vec3(0.0, length, 0.0));
+    draw_line(img_data, width, height, O.x(), height-O.y(), Z.x(), height-Z.y(), Vec3(0.0, 0.0, length));
 }
 
 inline Vec3 trace_ray(const Ray &r, const Hitable &world, int depth = 0)
@@ -279,12 +279,12 @@ int main(int argc, char *argv[])
     
     uint8_t * pixels = new uint8_t[3*width*height];
     
-    int ns = 5;
+    int ns = 20;
     
     int start = 0;
     int stop = 100;
     int tmax = 100;
-    const char * filename = "../out/book_";
+    const char * filename = "../out/lighting_";
     for (int t = start; t < stop; t++) {
         float tm = tmax > 1 ? float(t) / (tmax-1) : 0.5;
         tm = (sin(-M_PI/2 + tm*M_PI) + 1.0) / 2.0;
@@ -298,7 +298,7 @@ int main(int argc, char *argv[])
         float y = 8 + 10 * 4*(tm-0.5)*(tm-0.5);
         float z = 50.0 * cos(2*tm*M_PI);
         //cam.look_at(Vec3(x, y, z), Vec3(0, 3, 0), Vec3(0, 1, 0));
-        cam.look_at(Vec3(x, y, z), Vec3(0, 1, 0), Vec3(0.2, 0.8, 0));
+        cam.look_at(Vec3(x, y, z), Vec3(0, 1, 0), Vec3(0.5, 0.5, 0));
         
         std::cout << "Rendering frame " << t << std::endl;
 
@@ -321,7 +321,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        draw_world_axis(pixels, width, height, cam);
+        draw_world_axis(pixels, width, height, cam, 3.0);
 
         std::stringstream ss;
         ss << filename << std::setw(3) << std::setfill('0') << t << ".png";

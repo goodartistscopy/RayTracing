@@ -52,7 +52,7 @@ Vec3 Camera::project(Vec3 x) const
     Vec3 ox = x - origin;
     Vec3 xc(dot(cx, ox), dot(cy, ox), dot(cz, ox));
     Vec3 xp = xc / -xc.z();
-    return Vec3(xp.x(), xp.y(), xp.z()) + 0.5;
+    return (xp + Vec3(half_width, half_height, 0.0)) / Vec3(2 * half_width, 2 * half_height, 1.0);
 }
 
 void Camera::update_internals()
